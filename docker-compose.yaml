@@ -4,10 +4,20 @@ services:
   app:
     build: .
     container_name: app
+    # entrypoint: dockerize -template ./.docker/app/.env:.env    
+    # environment:
+    #   - DB_HOST=db
+    #   - DB_DATABASE=laravel
+    #   - DB_USERNAME=root
+    #   - DB_PASSWORD=root
     volumes:
       - .:/var/www
     networks:
       - app-network
+    depends_on:
+      - db
+      # db:
+      #   condition: service_healthy
 
   nginx:
     build: .docker/nginx
@@ -37,6 +47,11 @@ services:
       - MYSQL_USER=root
     networks: 
       - app-network
+    # healthcheck:
+    #   test: ["CMD-SHELL", 'mysql -uroot --database=laravel --password=root --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B']
+    #   interval: 10s
+    #   timeout: 10s
+    #   retries: 10
   
   redis:
     image: redis:alpine
